@@ -60,7 +60,8 @@ class sslide{
         return $(`.sslide__card[data-index:"${n}"]`, this.parent);
     }
 
-    constructor(parent, treshold){
+    constructor(parent, options){
+        for(let option in options) this[option] = options[option];
         let self = this;
 
         if(parent){

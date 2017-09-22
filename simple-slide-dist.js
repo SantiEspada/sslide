@@ -7,24 +7,25 @@ function _classCallCheck(t, e) {
 var _createClass = function() {
     function t(t, e) {
         for (var n = 0; n < e.length; n++) {
-            var a = e[n];
-            a.enumerable = a.enumerable || !1, a.configurable = !0, "value" in a && (a.writable = !0), 
-            Object.defineProperty(t, a.key, a);
+            var s = e[n];
+            s.enumerable = s.enumerable || !1, s.configurable = !0, "value" in s && (s.writable = !0), 
+            Object.defineProperty(t, s.key, s);
         }
     }
-    return function(e, n, a) {
-        return n && t(e.prototype, n), a && t(e, a), e;
+    return function(e, n, s) {
+        return n && t(e.prototype, n), s && t(e, s), e;
     };
 }(), sslide = function() {
     function t(e, n) {
         _classCallCheck(this, t), this.animating = !1, this.numOfCards = 0, this.treshold = 150, 
         this.pullDeltaX = 0, this.fadeCards = !0, this.scrollOnSlide = !0, this.shift = 1;
+        for (var s in n) this[s] = n[s];
         var a = this;
         if (!e) throw new Error("[sslide] Parent element must be defined!");
         if (this.parent = e, this.numOfCards = this.cardsCounter = $(e).find(".sslide__card").length, 
-        void 0 !== n) {
-            if ("number" != typeof n) throw new Error("[sslide] this.treshold must be a number!");
-            this.treshold = n;
+        "undefined" != typeof treshold) {
+            if ("number" != typeof treshold) throw new Error("[sslide] this.treshold must be a number!");
+            this.treshold = treshold;
         }
         $(e).find(".sslide__card").each(function(t, e) {
             e.dataset.index = t + 1;
@@ -32,9 +33,9 @@ var _createClass = function() {
             if (!a.animating) {
                 var e = new Date().getTime(), n = !1;
                 if (a.currentCard = $(this), "1" == a.currentCard.attr("data-index")) {
-                    var i = t.pageX || t.originalEvent.touches[0].pageX;
+                    var s = t.pageX || t.originalEvent.touches[0].pageX;
                     $(document).on("touchmove", function(t) {
-                        var e = (t.pageX || t.originalEvent.touches[0].pageX) - i;
+                        var e = (t.pageX || t.originalEvent.touches[0].pageX) - s;
                         Math.abs(e) > 25 && (n = !0, a.pullDeltaX = e, a.pullDeltaX && a.pullChange());
                     }), $(document).on("touchend", function() {
                         if ($(document).off("touchmove touchend"), a.pullDeltaX && a.release(), !n && new Date().getTime() - e < 100) {
