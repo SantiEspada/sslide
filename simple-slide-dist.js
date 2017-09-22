@@ -6,47 +6,53 @@ function _classCallCheck(t, e) {
 
 var _createClass = function() {
     function t(t, e) {
-        for (var s = 0; s < e.length; s++) {
-            var n = e[s];
-            n.enumerable = n.enumerable || !1, n.configurable = !0, "value" in n && (n.writable = !0), 
-            Object.defineProperty(t, n.key, n);
+        for (var n = 0; n < e.length; n++) {
+            var a = e[n];
+            a.enumerable = a.enumerable || !1, a.configurable = !0, "value" in a && (a.writable = !0), 
+            Object.defineProperty(t, a.key, a);
         }
     }
-    return function(e, s, n) {
-        return s && t(e.prototype, s), n && t(e, n), e;
+    return function(e, n, a) {
+        return n && t(e.prototype, n), a && t(e, a), e;
     };
 }(), sslide = function() {
-    function t(e, s) {
+    function t(e, n) {
         _classCallCheck(this, t), this.animating = !1, this.numOfCards = 0, this.treshold = 150, 
-        this.pullDeltaX = 0, this.shift = 1;
-        var n = this;
+        this.pullDeltaX = 0, this.fadeCards = !0, this.scrollOnSlide = !0, this.shift = 1;
+        var a = this;
         if (!e) throw new Error("[sslide] Parent element must be defined!");
         if (this.parent = e, this.numOfCards = this.cardsCounter = $(e).find(".sslide__card").length, 
-        void 0 !== s) {
-            if ("number" != typeof s) throw new Error("[sslide] this.treshold must be a number!");
-            this.treshold = s;
+        void 0 !== n) {
+            if ("number" != typeof n) throw new Error("[sslide] this.treshold must be a number!");
+            this.treshold = n;
         }
         $(e).find(".sslide__card").each(function(t, e) {
             e.dataset.index = t + 1;
-        }), $(document).on("mousedown touchstart", e + " .sslide__card:not(.inactive)", function(t) {
-            if (!n.animating) {
-                n.currentCard = $(this);
-                var e = t.pageX || t.originalEvent.touches[0].pageX;
-                $(document).on("mousemove touchmove", function(t) {
-                    var s = t.pageX || t.originalEvent.touches[0].pageX;
-                    n.pullDeltaX = s - e, n.pullDeltaX && n.pullChange();
-                }), $(document).on("mouseup touchend", function() {
-                    $(document).off("mousemove touchmove mouseup touchend"), console.log(n.pullDeltaX, n.treshold), 
-                    n.pullDeltaX && n.release();
-                });
+        }), $(document).on("touchstart", e + " .sslide__card:not(.inactive)", function(t) {
+            if (!a.animating) {
+                var e = new Date().getTime(), n = !1;
+                if (a.currentCard = $(this), "1" == a.currentCard.attr("data-index")) {
+                    var i = t.pageX || t.originalEvent.touches[0].pageX;
+                    $(document).on("touchmove", function(t) {
+                        var e = (t.pageX || t.originalEvent.touches[0].pageX) - i;
+                        Math.abs(e) > 25 && (n = !0, a.pullDeltaX = e, a.pullDeltaX && a.pullChange());
+                    }), $(document).on("touchend", function() {
+                        if ($(document).off("touchmove touchend"), a.pullDeltaX && a.release(), !n && new Date().getTime() - e < 100) {
+                            var t = a.currentCard.find("a.card-wp-link");
+                            t && (document.location.href = t.prop("href"));
+                        }
+                    });
+                }
             }
         });
     }
     return _createClass(t, [ {
         key: "pullChange",
         value: function() {
-            this.animating = !0, this.currentCard.css("transform", "translateX(" + this.pullDeltaX + "px)");
-            var t = Math.abs(this.pullDeltaX) / this.treshold * -1 + 1;
+            this.scrollOnSlide || $("html, body").css("overflow", "hidden"), this.animating = !0, 
+            this.currentCard.css("transform", "translateX(" + this.pullDeltaX + "px)");
+            Math.abs(this.pullDeltaX);
+            var t = fadeCards ? 1 / this.treshold * -1 + 1 : 1;
             t = function(t) {
                 return --t * t * t + 1;
             }(t), this.currentCard.css("opacity", t), this.currentCard.css("transition", "0s");
@@ -54,11 +60,11 @@ var _createClass = function() {
     }, {
         key: "release",
         value: function() {
-            if (Math.abs(this.pullDeltaX) >= this.treshold) {
-                console.log("card discarded"), this.shift = this.shift + 1 > this.numOfCards ? 1 : this.shift + 1;
+            if (this.scrollOnSlide || $("html, body").css("overflow", "initial"), Math.abs(this.pullDeltaX) >= this.treshold) {
+                this.shift = this.shift + 1 > this.numOfCards ? 1 : this.shift + 1;
                 var t = [];
-                $(this.parent).find(".sslide__card").each(function(e, s) {
-                    t.push(s);
+                $(this.parent).find(".sslide__card").each(function(e, n) {
+                    t.push(n);
                 }), console.log(t);
                 for (var e = 0; e < this.shift; e++) t.push(t.shift());
                 t.forEach(function(t, e) {
@@ -66,9 +72,9 @@ var _createClass = function() {
                 });
             }
             Math.abs(this.pullDeltaX) < this.treshold && this.currentCard.attr("style", "transition: .3s;");
-            var s = this;
+            var n = this;
             setTimeout(function() {
-                s.currentCard.attr("style", ""), s.pullDeltaX = 0, s.animating = !1;
+                n.currentCard.attr("style", ""), n.pullDeltaX = 0, n.animating = !1;
             }, 300);
         }
     }, {

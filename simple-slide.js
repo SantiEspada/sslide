@@ -6,24 +6,26 @@ class sslide{
     numOfCards = 0;
     treshold = 150;
     pullDeltaX = 0;
+    fadeCards = true;
+    scrollOnSlide = true;
     shift = 1;
     currentCard;
 
     pullChange() {
+        if(!this.scrollOnSlide) $('html, body').css('overflow', 'hidden');
         this.animating = true;
         this.currentCard.css('transform', 'translateX(' + this.pullDeltaX + 'px)');
         
-        var absDelta = Math.abs(this.pullDeltaX);
-        var opacity = (absDelta/this.treshold)*(-1)+1;
+        let absDelta = Math.abs(this.pullDeltaX);
+        let opacity = fadeCards ? (1/this.treshold)*(-1)+1 : 1;
         opacity = (function (t) { return (--t)*t*t+1 })(opacity);
         this.currentCard.css('opacity', opacity);
         this.currentCard.css('transition', '0s');
     };
 
     release() {
+        if(!this.scrollOnSlide) $('html, body').css('overflow', 'initial');
         if (Math.abs(this.pullDeltaX) >= this.treshold) {
-            /* tarjeta descartada */
-            console.log('card discarded');
 
             this.shift = (this.shift+1 > this.numOfCards) ? 1 : this.shift+1;
             let els = [];
@@ -34,7 +36,7 @@ class sslide{
 
             console.log(els);
 
-            for(var i = 0; i < this.shift; i++){
+            for(let i = 0; i < this.shift; i++){
                 els.push(els.shift());
             }
 
@@ -42,7 +44,6 @@ class sslide{
         }
 
         if (Math.abs(this.pullDeltaX) < this.treshold) {
-            /* tarjeta vuelve */
             this.currentCard.attr('style', 'transition: .3s;');
         }
 
@@ -81,25 +82,38 @@ class sslide{
             el.dataset.index = i+1;
         });
 
-        $(document).on('mousedown touchstart', parent + ' .sslide__card:not(.inactive)', function (e) {
+        $(document).on('touchstart', parent + ' .sslide__card:not(.inactive)', function (e) {
             if (self.animating) return;
 
+            let mt_start = new Date().getTime(),
+                moved = false;
+
             self.currentCard = $(this);
-            var startX = e.pageX || e.originalEvent.touches[0].pageX;
+            if(self.currentCard.attr('data-index') == '1'){
 
-            $(document).on('mousemove touchmove', function (e) {
-                var x = e.pageX || e.originalEvent.touches[0].pageX;
-                self.pullDeltaX = (x - startX);
-                if (!self.pullDeltaX) return;
-                self.pullChange();
-            });
+                let x1 = e.pageX || e.originalEvent.touches[0].pageX
+                $(document).on('touchmove', function (e) {
+                    let x2 = e.pageX || e.originalEvent.touches[0].pageX,
+                        diff = x2-x1;
+                    
+                    if(Math.abs(diff) > 25){
+                        moved = true;
+                        self.pullDeltaX = diff;
+                        self.pullDeltaX && self.pullChange();
+                    }
+                });
+                
+                $(document).on('touchend', function () {
+                    $(document).off('touchmove touchend');
+                    self.pullDeltaX && self.release();
 
-            $(document).on('mouseup touchend', function () {
-                $(document).off('mousemove touchmove mouseup touchend');
-                console.log(self.pullDeltaX, self.treshold);
-                if (!self.pullDeltaX) return; // prevents from rapindex click events
-                self.release();
-            });
+                    if(!moved && (new Date().getTime()) - mt_start < 100){
+                        let link_href = self.currentCard.find('a.card-wp-link');
+
+                        if(link_href) document.location.href = link_href.prop('href');
+                    }
+                });
+            }
         });
     }
 };
